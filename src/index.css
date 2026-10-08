@@ -59,36 +59,38 @@
 }
 
 /* Fill the full viewport including OS safe areas (status bar + bottom nav).
-   The app background colour bleeds into those insets so they always match —
-   no matter which page is open or which theme is active. */
+   Key insight: `html` background fills whatever the browser exposes below
+   the page content (the OS chrome gap). Setting it on html + body ensures
+   the app color bleeds into the bottom gesture bar / nav strip. */
 html {
+  margin: 0;
+  padding: 0;
   min-height: 100%;
-  /* Extend background into top/bottom system UI areas */
-  background: var(--bg);
+  background: var(--bg);          /* fills the gap below content on short pages */
+  /* Expand into safe areas on all four sides */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
-html,
 body {
   margin: 0;
-  min-height: 100%;
-  /* Stretch to fill safe areas on all sides */
-  min-height: 100dvh;
-}
-
-body {
+  padding: 0;
+  min-height: 100vh;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s ease, color 0.3s ease;
-  /* Paint app bg into bottom safe-area (gesture bar / home indicator) */
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Root div also needs to fill full height */
+/* Root div fills at least the full visual viewport */
 #root {
-  min-height: 100dvh;
+  min-height: 100vh;
   background: var(--bg);
+  display: flex;
+  flex-direction: column;
 }
 
 a {
@@ -109,8 +111,6 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
-  /* extend into top safe-area so navbar sits flush with status bar */
-  padding-top: calc(14px + env(safe-area-inset-top));
   background: var(--nav-bg);
   backdrop-filter: saturate(160%) blur(12px);
   border-bottom: 1px solid var(--border);
