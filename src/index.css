@@ -71,13 +71,11 @@
 html {
   margin: 0;
   padding: 0;
-  min-height: 100%;
-  background: var(--bg);          /* fills the gap below content on short pages */
-  /* Expand into safe areas on all four sides */
-  padding-top: env(safe-area-inset-top);
+  /* Only bottom safe-area padding — fills the gap below content with app bg.
+     Left/right/top are NOT padded here to avoid breaking the page layout. */
   padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  min-height: 100%;
+  background: var(--bg);
 }
 
 body {
@@ -2364,8 +2362,8 @@ tr:last-child td {
 /* Premium gradient stat cards */
 .stat-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
   margin-bottom: 28px;
 }
 .stat-card {
