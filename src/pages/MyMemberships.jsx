@@ -110,8 +110,8 @@ export default function MyMemberships() {
       || (ptSub?.status === "active" ? ptSub : null)
       || regularSub || ptSub;
 
-    // memberId for attendance calendar — use the tab's sub
-    const calMemberId = activeSub?._id;
+    // memberId for attendance calendar — always use regular sub
+    // (PT attendance not tracked separately)
 
     return (
       <>
@@ -209,7 +209,7 @@ export default function MyMemberships() {
           </div>
         )}
 
-        {/* Attendance calendar — always below, scoped to active tab's member */}
+        {/* Attendance calendar — always below, scoped to REGULAR member only */}
         <div className="myd-att-section">
           <div className="myd-att-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -220,7 +220,7 @@ export default function MyMemberships() {
             Attendance
           </div>
           <Suspense fallback={<div className="loading">Loading…</div>}>
-            {calMemberId && <AttendanceCalendar memberId={calMemberId} />}
+            {regularSub?._id && <AttendanceCalendar memberId={regularSub._id} />}
           </Suspense>
         </div>
 
