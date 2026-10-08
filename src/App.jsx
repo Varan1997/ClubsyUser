@@ -17,10 +17,10 @@ import MarkAttendance from "./pages/MarkAttendance.jsx";
 
 function Shell({ children }) {
   return (
-    <>
+    <div className="shell">
       <Navbar />
       <div className="container">{children}</div>
-    </>
+    </div>
   );
 }
 

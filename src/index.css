@@ -97,9 +97,11 @@ body {
   flex-direction: column;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* Shell wrapper (Navbar + container) stretches to fill remaining height */
+.shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 button {
@@ -181,6 +183,8 @@ button {
   max-width: 1240px;
   margin: 0 auto;
   padding: 28px 24px 48px;
+  flex: 1;          /* fill remaining height inside the shell */
+  width: 100%;
 }
 @media (min-width: 1400px) {
   .container {
