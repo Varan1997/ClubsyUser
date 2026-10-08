@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Navbar from "./components/Navbar.jsx";
+import InstallBanner from "./components/InstallBanner.jsx";
 import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -12,6 +13,7 @@ import ChooseRole from "./pages/ChooseRole.jsx";
 import MyMemberships from "./pages/MyMemberships.jsx";
 import Attend from "./pages/Attend.jsx";
 import VenueAttendance from "./pages/VenueAttendance.jsx";
+import MarkAttendance from "./pages/MarkAttendance.jsx";
 
 function Shell({ children }) {
   return (
@@ -24,7 +26,9 @@ function Shell({ children }) {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <InstallBanner />
+      <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/attend/:venueId" element={<Attend />} />
       <Route
@@ -106,6 +110,16 @@ export default function App() {
         }
       />
       <Route
+        path="/attendance/mark"
+        element={
+          <ProtectedRoute>
+            <Shell>
+              <MarkAttendance />
+            </Shell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/centers/:id"
         element={
           <ProtectedRoute>
@@ -116,6 +130,7 @@ export default function App() {
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
