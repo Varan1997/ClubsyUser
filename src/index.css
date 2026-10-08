@@ -58,10 +58,21 @@
   box-sizing: border-box;
 }
 
+/* Fill the full viewport including OS safe areas (status bar + bottom nav).
+   The app background colour bleeds into those insets so they always match —
+   no matter which page is open or which theme is active. */
+html {
+  min-height: 100%;
+  /* Extend background into top/bottom system UI areas */
+  background: var(--bg);
+}
+
 html,
 body {
   margin: 0;
   min-height: 100%;
+  /* Stretch to fill safe areas on all sides */
+  min-height: 100dvh;
 }
 
 body {
@@ -70,6 +81,14 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s ease, color 0.3s ease;
+  /* Paint app bg into bottom safe-area (gesture bar / home indicator) */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Root div also needs to fill full height */
+#root {
+  min-height: 100dvh;
+  background: var(--bg);
 }
 
 a {
@@ -90,6 +109,8 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
+  /* extend into top safe-area so navbar sits flush with status bar */
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: var(--nav-bg);
   backdrop-filter: saturate(160%) blur(12px);
   border-bottom: 1px solid var(--border);
