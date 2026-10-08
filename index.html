@@ -6,7 +6,10 @@
 
     <!-- PWA / installability -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#c9a227" />
+    <!-- theme-color: matches --bg for each theme so status bar + bottom nav blend in.
+         JS in ThemeContext.jsx overrides these at runtime when the user toggles. -->
+    <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)" />
     <meta name="mobile-web-app-capable" content="yes" />
 
     <!-- iOS Safari PWA support -->
@@ -14,6 +17,21 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Clubsy" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Instantly apply saved theme before React mounts — prevents flash and
+         ensures the OS status bar colour is correct from the very first frame. -->
+    <script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (!theme) theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+        var color = theme === "light" ? "#faf8f3" : "#0a0e1a";
+        document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+          m.removeAttribute("media");
+          m.setAttribute("content", color);
+        });
+      })();
+    </script>
 
     <!-- SEO / share previews -->
     <meta name="description" content="Manage gym & venue memberships, track attendance and collect payments." />
