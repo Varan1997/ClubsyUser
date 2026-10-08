@@ -6039,3 +6039,68 @@ button.stat-card {
   .pt-label { font-size: 12px; }
   .plans-tab { padding: 11px 6px; gap: 6px; }
 }
+
+/* ============================================================
+   MyMemberships detail — subscription tab switcher
+   ============================================================ */
+.myd-sub-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px -8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Only show when there's a single subscription type */
+.myd-sub-tabs:has(.myd-sub-tab:only-of-type) {
+  display: none;
+}
+
+.myd-sub-tab-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  box-shadow: 0 4px 14px -4px rgba(var(--primary-rgb), 0.65);
+  transition: transform 0.28s cubic-bezier(0.34, 1.26, 0.64, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.myd-sub-tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 8px;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.22s ease;
+  white-space: nowrap;
+}
+.myd-sub-tab.active {
+  color: var(--on-primary);
+}
+.myd-sub-tab svg {
+  flex-shrink: 0;
+}
+
+/* If only one type exists, hide the tabs and show content directly */
+.myd-sub-tabs:has(> .myd-sub-tab:only-child) {
+  display: none;
+}

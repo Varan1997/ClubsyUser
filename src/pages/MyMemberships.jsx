@@ -199,7 +199,7 @@ export default function MyMemberships() {
 
   function handleSelect(m) {
     setSelected(m);
-    setSubSelected(null);
+    setSubSelected(null); // will be resolved to regularSub/ptSub inside detail view
     setActiveTab("sub");
   }
 
@@ -346,32 +346,68 @@ export default function MyMemberships() {
         </div>
         <div className="myd-progress-label">{pctLeft}% of plan remaining</div>
 
-        {/* Subscription tiles — always visible */}
-        <div className="myd-sub-groups">
-          <SubTile
-            label="Regular Membership"
-            type="regular"
-            sub={regularSub}
-            onSelect={(s) => setSubSelected(s)}
-            icon={
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {/* Subscription tab switcher — show only the selected type */}
+        <div className="myd-sub-tabs">
+          {regularSub && (
+            <button
+              type="button"
+              className={`myd-sub-tab ${(!subSelected || subSelected?.memberType !== "pt") ? "active" : ""}`}
+              onClick={() => setSubSelected(regularSub)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
               </svg>
-            }
-          />
-          <SubTile
-            label="Personal Training"
-            type="pt"
-            sub={ptSub}
-            onSelect={(s) => setSubSelected(s)}
-            icon={
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              Regular
+            </button>
+          )}
+          {ptSub && (
+            <button
+              type="button"
+              className={`myd-sub-tab ${subSelected?.memberType === "pt" ? "active" : ""}`}
+              onClick={() => setSubSelected(ptSub)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 4v16M18 4v16M6 12h12"/>
                 <circle cx="6" cy="4" r="2"/><circle cx="18" cy="4" r="2"/>
                 <circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/>
               </svg>
-            }
-          />
+              Personal Training
+            </button>
+          )}
+          {/* sliding indicator */}
+          {regularSub && ptSub && (
+            <div
+              className="myd-sub-tab-indicator"
+              style={{ transform: `translateX(${subSelected?.memberType === "pt" ? "100%" : "0%"})` }}
+            />
+          )}
+        </div>
+
+        {/* Show only the active subscription tile */}
+        <div className="myd-sub-groups">
+          {(() => {
+            const activeSub = subSelected?.memberType === "pt" ? ptSub : (regularSub || ptSub);
+            const isPt = activeSub?.memberType === "pt";
+            return activeSub ? (
+              <SubTile
+                label={isPt ? "Personal Training" : "Regular Membership"}
+                type={activeSub.memberType || "regular"}
+                sub={activeSub}
+                onSelect={(s) => setSubSelected(s)}
+                icon={isPt ? (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 4v16M18 4v16M6 12h12"/>
+                    <circle cx="6" cy="4" r="2"/><circle cx="18" cy="4" r="2"/>
+                    <circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/>
+                  </svg>
+                ) : (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+                  </svg>
+                )}
+              />
+            ) : null;
+          })()}
         </div>
 
         {/* Attendance calendar — always visible below */}
