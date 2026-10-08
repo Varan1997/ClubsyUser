@@ -331,31 +331,60 @@ export default function Plans() {
       </Link>
 
       <div className="form-page">
-        <div className="form-page-head">
-          <div>
-            <h1>Membership Plans</h1>
-            <div className="sub">
-              Set your own durations &amp; prices · {center.name}
+        {/* Premium page header */}
+        <div className="plans-hero">
+          <div className="plans-hero-orb plans-hero-orb-1" />
+          <div className="plans-hero-orb plans-hero-orb-2" />
+          <div className="plans-hero-inner">
+            <div className="plans-hero-eyebrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Membership Plans
             </div>
+            <h1 className="plans-hero-title">{center.name}</h1>
+            <p className="plans-hero-sub">Set durations &amp; prices for Regular and PT memberships</p>
           </div>
         </div>
 
-        {/* Tab switcher */}
+        {/* Premium tab switcher */}
         <div className="plans-tabs">
           <button
             type="button"
-            className={activeTab === "regular" ? "active" : ""}
+            className={`plans-tab ${activeTab === "regular" ? "active" : ""}`}
             onClick={() => setActiveTab("regular")}
           >
-            Regular Plans
+            <span className="pt-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+                <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+              </svg>
+            </span>
+            <span className="pt-label">Regular</span>
+            {plans.filter(p => p.days && p.price).length > 0 && (
+              <span className="pt-badge">{plans.filter(p => p.days && p.price).length}</span>
+            )}
           </button>
           <button
             type="button"
-            className={activeTab === "pt" ? "active" : ""}
+            className={`plans-tab ${activeTab === "pt" ? "active" : ""}`}
             onClick={() => setActiveTab("pt")}
           >
-            PT Plans
+            <span className="pt-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 4v16M18 4v16M6 12h12"/>
+                <circle cx="6" cy="4" r="2"/><circle cx="18" cy="4" r="2"/>
+                <circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/>
+              </svg>
+            </span>
+            <span className="pt-label">Personal Training</span>
+            {ptPlans.filter(p => p.days && p.price).length > 0 && (
+              <span className="pt-badge">{ptPlans.filter(p => p.days && p.price).length}</span>
+            )}
           </button>
+          {/* sliding indicator */}
+          <div
+            className="plans-tab-indicator"
+            style={{ transform: `translateX(${activeTab === "pt" ? "100%" : "0%"})` }}
+          />
         </div>
 
         <div className="form-card">
