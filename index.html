@@ -6,10 +6,13 @@
 
     <!-- PWA / installability -->
     <link rel="manifest" href="/manifest.json" />
-    <!-- theme-color: matches --bg for each theme so status bar + bottom nav blend in.
-         JS in ThemeContext.jsx overrides these at runtime when the user toggles. -->
+    <!-- theme-color controls the status bar AND bottom nav bar on Android Chrome.
+         Both tags are overridden immediately by the inline script below. -->
     <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)" />
+    <!-- color-scheme tells the Android system UI (bottom nav, scrollbars, inputs)
+         which mode the page is using — critical for bottom bar color on Samsung/Pixel. -->
+    <meta name="color-scheme" content="dark light" />
     <meta name="mobile-web-app-capable" content="yes" />
 
     <!-- iOS Safari PWA support -->
@@ -18,18 +21,27 @@
     <meta name="apple-mobile-web-app-title" content="Clubsy" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 
-    <!-- Instantly apply saved theme before React mounts — prevents flash and
-         ensures the OS status bar colour is correct from the very first frame. -->
+    <!-- Instantly apply saved theme before React mounts.
+         Sets theme-color AND color-scheme so both top and bottom system UI
+         bars match the app background from the very first frame. -->
     <script>
       (function () {
         var theme = localStorage.getItem("theme");
         if (!theme) theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
         document.documentElement.setAttribute("data-theme", theme);
-        var color = theme === "light" ? "#faf8f3" : "#0a0e1a";
+
+        var bgColor = theme === "light" ? "#faf8f3" : "#0a0e1a";
+
+        // Override all theme-color tags to a single value (remove media queries)
         document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
           m.removeAttribute("media");
-          m.setAttribute("content", color);
+          m.setAttribute("content", bgColor);
         });
+
+        // Set color-scheme so Android bottom nav bar matches
+        var cs = document.querySelector('meta[name="color-scheme"]');
+        if (cs) cs.setAttribute("content", theme === "light" ? "light" : "dark");
+        document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
       })();
     </script>
 

@@ -20,6 +20,7 @@
 /* Dark theme (default) */
 :root,
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0a0e1a;
   --bg-grad-1: #141b30;
   --bg-grad-2: #0a0e1a;
@@ -36,6 +37,7 @@
 
 /* Light theme */
 [data-theme="light"] {
+  color-scheme: light;
   --bg: #faf8f3;
   --bg-grad-1: #f4efe3;
   --bg-grad-2: #fcfbf7;

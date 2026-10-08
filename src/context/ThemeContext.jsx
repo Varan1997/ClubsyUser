@@ -18,10 +18,14 @@ function getInitialTheme() {
 }
 
 /** Update every <meta name="theme-color"> tag (there may be one from the PWA
- *  manifest injection too) so the status bar + bottom nav bar both match. */
+ *  manifest injection too) so the status bar + bottom nav bar both match.
+ *  Also updates <meta name="color-scheme"> and the html element's
+ *  color-scheme style — this is what fixes the Android bottom nav bar. */
 function applyThemeColor(theme) {
-  const color = THEME_COLORS[theme] ?? THEME_COLORS.dark;
-  // Update existing tags or create one if missing
+  const bgColor = THEME_COLORS[theme] ?? THEME_COLORS.dark;
+  const colorScheme = theme === "light" ? "light" : "dark";
+
+  // 1. theme-color meta — controls status bar tint on Chrome/Samsung
   let tags = document.querySelectorAll('meta[name="theme-color"]');
   if (tags.length === 0) {
     const tag = document.createElement("meta");
@@ -29,7 +33,23 @@ function applyThemeColor(theme) {
     document.head.appendChild(tag);
     tags = [tag];
   }
-  tags.forEach((tag) => tag.setAttribute("content", color));
+  tags.forEach((tag) => {
+    tag.removeAttribute("media"); // collapse any media-query variants
+    tag.setAttribute("content", bgColor);
+  });
+
+  // 2. color-scheme meta — tells Android system UI (bottom nav bar, scrollbars)
+  //    which mode is active; without this the bottom bar stays gray/white
+  let cs = document.querySelector('meta[name="color-scheme"]');
+  if (!cs) {
+    cs = document.createElement("meta");
+    cs.name = "color-scheme";
+    document.head.appendChild(cs);
+  }
+  cs.setAttribute("content", colorScheme);
+
+  // 3. html element color-scheme property — reinforces at the CSS layer
+  document.documentElement.style.colorScheme = colorScheme;
 }
 
 export function ThemeProvider({ children }) {
