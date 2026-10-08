@@ -241,7 +241,7 @@ export default function MyMemberships() {
   // ── List view — one card per venue ──────────────────────────────────────────
   return (
     <>
-      <Link to="/choose" className="back-link">
+      <Link to="/choose" state={{ from: "back" }} className="back-link">
         <span className="back-icon" aria-hidden="true">←</span> Switch
       </Link>
 

@@ -202,7 +202,7 @@ export default function Dashboard() {
 
       {/* ── Bottom nav ── */}
       <div className="dash-actions">
-        <button className="btn secondary" onClick={() => navigate("/choose")}>
+        <button className="btn secondary" onClick={() => navigate("/choose", { state: { from: "back" } })}>
           ← Back
         </button>
         <button className="btn" onClick={() => setShowAddModal(true)}>

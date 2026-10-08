@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import api from "../api/axios.js";
 
 export default function ChooseRole() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { owner } = useAuth();
   const firstName = owner?.name?.split(" ")[0] || "there";
 
   const [checking, setChecking] = useState(true);
 
+  // If the user arrived here via an explicit back/switch action, skip
+  // the auto-redirect so they can actually see the choose screen.
+  const explicitVisit = location.state?.from === "back";
+
   useEffect(() => {
+    if (explicitVisit) {
+      setChecking(false);
+      return;
+    }
+
     // Check both owner centers and member memberships in parallel,
     // then auto-redirect if the path is obvious.
     Promise.all([
@@ -28,7 +38,7 @@ export default function ChooseRole() {
         setChecking(false);
       }
     });
-  }, [navigate]);
+  }, [navigate, explicitVisit]);
 
   if (checking) return <div className="loading">Loading…</div>;
 
