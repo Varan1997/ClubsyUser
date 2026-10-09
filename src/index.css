@@ -2385,6 +2385,15 @@ tr:last-child td {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.85);
 }
+.dash-hero-address {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
 .hero-add {
   position: relative;
   z-index: 1;
@@ -6225,8 +6234,8 @@ button.stat-card {
 .my-venue-card {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 0;
   padding: 14px 14px 14px 18px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -6237,9 +6246,7 @@ button.stat-card {
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 }
-.my-venue-card:active {
-  transform: scale(0.98);
-}
+.my-venue-card:active { transform: scale(0.98); }
 .my-venue-card:hover {
   border-color: var(--primary);
   box-shadow: 0 6px 24px -8px rgba(var(--primary-rgb), 0.35);
@@ -6254,6 +6261,17 @@ button.stat-card {
   background: linear-gradient(180deg, var(--accent), var(--primary));
   border-radius: 16px 0 0 16px;
 }
+
+/* Single row: icon · info · badge · chevron */
+.mvc-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Remove unused bottom-row styles */
+.mvc-bottom-row { display: none; }
+.mvc-bottom-actions { display: none; }
 
 .mvc-ic {
   flex: 0 0 auto;
@@ -6277,14 +6295,20 @@ button.stat-card {
 .mvc-name {
   font-size: 15px;
   font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   color: var(--text);
+  word-break: break-word;
 }
 .mvc-type {
   font-size: 12px;
   color: var(--muted);
+}
+.mvc-address {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 1px;
 }
 
 .mvc-chevron {
@@ -6528,4 +6552,52 @@ button.stat-card {
 .noti-view-link {
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Contact owner box */
+.myd-contact-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+.myd-contact-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.myd-contact-actions {
+  display: flex;
+  gap: 10px;
+}
+.myd-contact-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.myd-contact-btn:active { transform: scale(0.97); opacity: 0.85; }
+.myd-contact-btn.call {
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary-rgb), 0.25);
+}
+.myd-contact-btn.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.3);
 }

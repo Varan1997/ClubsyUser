@@ -242,6 +242,46 @@ export default function MyMemberships() {
           </svg>
         </Link>
 
+        {/* Contact owner */}
+        {venue?.ownerInfo?.phone && (
+          <div className="myd-contact-box">
+            <div className="myd-contact-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+                <path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+              </svg>
+              Contact {venue.ownerInfo.name || "Owner"}
+            </div>
+            <div className="myd-contact-actions">
+              <a
+                href={`tel:${venue.ownerInfo.phone}`}
+                className="myd-contact-btn call"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.86 19.86 0 0 1 3.08 4.18 2 2 0 0 1 5.09 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.71 2.81a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 5 5l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.71A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                Call
+              </a>
+              <a
+                href={`https://wa.me/91${venue.ownerInfo.phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="myd-contact-btn whatsapp"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.554 4.122 1.524 5.855L.057 23.886a.5.5 0 0 0 .606.63l6.278-1.643A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.686-.513-5.218-1.407l-.374-.22-3.878 1.016 1.034-3.774-.242-.389A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                </svg>
+                WhatsApp
+              </a>
+            </div>
+          </div>
+        )}
+
         {scanVenue && (
           <Suspense fallback={null}>
             <ScanCheckIn
@@ -312,42 +352,29 @@ export default function MyMemberships() {
                 {/* Left accent bar colored by type */}
                 <div className="mvc-accent" />
 
-                {/* Venue icon */}
-                <span className="mvc-ic">
-                  <CategoryIcon type={g.venue?.type || "Other"} />
-                </span>
-
-                {/* Name + type */}
-                <div className="mvc-info">
-                  <span className="mvc-name">{g.venue?.name || "Venue"}</span>
-                  <span className="mvc-type">{g.venue?.type || ""}</span>
+                {/* Top row: icon + name/type/address + status + chevron */}
+                <div className="mvc-top-row">
+                  <span className="mvc-ic">
+                    <CategoryIcon type={g.venue?.type || "Other"} />
+                  </span>
+                  <div className="mvc-info">
+                    <span className="mvc-name">{g.venue?.name || "Venue"}</span>
+                    <span className="mvc-type">{g.venue?.type || ""}</span>
+                    {(g.venue?.address || g.venue?.location) && (
+                      <span className="mvc-address">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        {[g.venue.address, g.venue.location].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
+                  </div>
+                  <StatusBadge status={cardSub?.status} daysLeft={cardSub?.daysLeft} />
+                  <svg className="mvc-chevron" width="16" height="16" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
                 </div>
-
-                {/* Status badge */}
-                <StatusBadge status={cardSub?.status} daysLeft={cardSub?.daysLeft} />
-
-                {/* Scan button */}
-                {g.venue?._id && (
-                  <button
-                    type="button"
-                    className="my-card-scan-ic"
-                    onClick={(e) => { e.stopPropagation(); setScanVenue(g.venue); }}
-                    aria-label={`Scan at ${g.venue?.name}`}
-                    title="Scan to check in"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                      strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
-                      <path d="M3 12h18"/>
-                    </svg>
-                  </button>
-                )}
-
-                {/* Chevron */}
-                <svg className="mvc-chevron" width="16" height="16" viewBox="0 0 24 24"
-                  fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
               </div>
             );
           })}

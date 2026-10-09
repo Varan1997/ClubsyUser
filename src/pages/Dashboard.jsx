@@ -5,6 +5,7 @@ import Modal from "../components/Modal.jsx";
 import CategoryIcon from "../components/CategoryIcon.jsx";
 import QrModal from "../components/QrModal.jsx";
 import { useToast } from "../context/ToastContext.jsx";
+import { downloadMembersPdf } from "../utils/downloadMembersPdf.js";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -150,6 +151,15 @@ export default function Dashboard() {
             Owner Dashboard
           </div>
           <h1 className="dash-hero-title">{headerTitle}</h1>
+          {centers.length === 1 && (centers[0].address || centers[0].location) && (
+            <div className="dash-hero-address">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              {[centers[0].address, centers[0].location].filter(Boolean).join(" · ")}
+            </div>
+          )}
           <div className="dash-hero-sub">
             <span className="dh-stat">{totals.total}</span> members
             <span className="dh-sep">·</span>
@@ -198,6 +208,7 @@ export default function Dashboard() {
             onNavigate={navigate}
             onUpi={() => openUpi(c)}
             onQr={() => setQrVenue(c)}
+            onDownload={() => downloadMembersPdf(c, api.get.bind(api))}
           />
         ))}
       </div>
@@ -268,7 +279,7 @@ export default function Dashboard() {
 }
 
 // ── Venue card ──────────────────────────────────────────────────────────────
-function VenueCard({ center: c, index, onNavigate, onUpi, onQr }) {
+function VenueCard({ center: c, index, onNavigate, onUpi, onQr, onDownload }) {
   const activeRate = c.summary.total
     ? Math.round((c.summary.active / c.summary.total) * 100)
     : 0;
@@ -329,6 +340,14 @@ function VenueCard({ center: c, index, onNavigate, onUpi, onQr }) {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
             Posts
+          </button>
+          <button className="vca-btn" onClick={(e) => { e.preventDefault(); onDownload(); }} title="Download PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            PDF
           </button>
         </div>
       </div>

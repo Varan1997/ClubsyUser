@@ -115,11 +115,11 @@ export default function MarkAttendance() {
         ? attendees.map((a, i) => `
             <tr>
               <td>${i + 1}</td>
-              <td>${a.name}</td>
+              <td class="name">${a.name}</td>
               <td>${a.phone || "—"}</td>
               <td>${a.checkInAt ? new Date(a.checkInAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—"}</td>
             </tr>`).join("")
-        : `<tr><td colspan="4" style="text-align:center;color:#888;padding:20px">No attendance recorded for this date</td></tr>`;
+        : `<tr><td colspan="4" class="empty-row">No attendance recorded for this date</td></tr>`;
 
       const html = `<!DOCTYPE html>
 <html>
@@ -127,26 +127,106 @@ export default function MarkAttendance() {
   <meta charset="UTF-8"/>
   <title>Attendance — ${venue} — ${day}</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 32px; color: #111; }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    .sub { font-size: 13px; color: #555; margin-bottom: 24px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: #1a1a2e; color: #fff; padding: 10px 12px; text-align: left; }
-    td { padding: 9px 12px; border-bottom: 1px solid #e5e5e5; }
-    tr:last-child td { border-bottom: none; }
-    tr:nth-child(even) td { background: #f7f7f7; }
-    .footer { margin-top: 24px; font-size: 12px; color: #888; text-align: right; }
-    @media print { body { padding: 16px; } }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; padding: 32px; color: #111; background: #fff; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-left: 5px solid #c19c27;
+      padding-left: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .header-left h1 { font-size: 22px; font-weight: 800; color: #111; margin-bottom: 4px; }
+    .badge {
+      display: inline-block;
+      background: #c19c27;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.04em;
+    }
+    .header-left .date-line { font-size: 13px; color: #444; margin-top: 5px; font-weight: 600; }
+    .header-left .generated { font-size: 11px; color: #999; margin-top: 4px; font-style: italic; }
+    .header-right { text-align: right; }
+    .header-right .big-count { font-size: 48px; font-weight: 900; color: #c19c27; line-height: 1; }
+    .header-right .count-label {
+      font-size: 11px; font-weight: 700; color: #888;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #c19c27; margin-bottom: 10px;
+      padding-bottom: 4px; border-bottom: 1.5px solid #c19c27; display: inline-block;
+    }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    thead th {
+      background: #1a1a2e; color: #fff; padding: 9px 10px;
+      text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+    }
+    tbody td { padding: 8px 10px; border-bottom: 1px solid #eeeeee; color: #222; }
+    tbody td.name { font-weight: 600; }
+    tbody tr:nth-child(even) td { background: #f9f8f5; }
+    tbody tr:last-child td { border-bottom: none; }
+    .empty-row { text-align: center; color: #888; padding: 24px; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 24px; font-size: 11px; color: #aaa;
+      display: flex; justify-content: space-between;
+      border-top: 1px solid #e5e5e5; padding-top: 10px;
+    }
+
+    @media print {
+      body { padding: 16px; }
+      .footer { position: fixed; bottom: 0; width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <h1>Attendance Report — ${venue}</h1>
-  <div class="sub">${dateLabel} &nbsp;·&nbsp; ${attendees.length} member${attendees.length !== 1 ? "s" : ""} present</div>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>${venue}<span class="badge">Attendance</span></h1>
+      <div class="date-line">📅 ${dateLabel}</div>
+      <div class="generated">Generated on ${new Date().toLocaleString("en-IN")}</div>
+    </div>
+    <div class="header-right">
+      <div class="big-count">${attendees.length}</div>
+      <div class="count-label">Present</div>
+    </div>
+  </div>
+
+  <div class="section-label">Check-in Details</div>
   <table>
-    <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Check-in Time</th></tr></thead>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Check-in Time</th>
+      </tr>
+    </thead>
     <tbody>${rows}</tbody>
   </table>
-  <div class="footer">Generated on ${new Date().toLocaleString("en-IN")}</div>
+
+  <div class="footer">
+    <span>${venue}</span>
+    <span>${attendees.length} member${attendees.length !== 1 ? "s" : ""} present</span>
+  </div>
+
   <script>window.onload = function(){ window.print(); }</script>
 </body>
 </html>`;
