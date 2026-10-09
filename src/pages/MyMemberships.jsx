@@ -226,6 +226,22 @@ export default function MyMemberships() {
           </Suspense>
         </div>
 
+        {/* Posts / Announcements link */}
+        <Link
+          to={`/my/venues/${venue._id}/posts`}
+          className="myd-posts-link"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          View venue announcements
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2.5" strokeLinecap="round" style={{ marginLeft: "auto" }}>
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </Link>
+
         {scanVenue && (
           <Suspense fallback={null}>
             <ScanCheckIn

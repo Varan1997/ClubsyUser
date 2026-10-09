@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 
 function timeAgo(date) {
@@ -26,17 +27,23 @@ const ICONS = {
   checkin_self:   "M20 6L9 17l-5-5",
   expiring:       "M12 7v5l3 2M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
   expired:        "M15 9l-6 6M9 9l6 6M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
+  announcement:   "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
 };
 
 const SWIPE_THRESHOLD = 60; // px to fully reveal the delete action
 
 // Single swipeable notification row
-function NotiItem({ n, onDelete }) {
+function NotiItem({ n, onDelete, onNavigate }) {
   const [offsetX, setOffsetX] = useState(0);
   const [swiping, setSwiping] = useState(false);
   const [removed, setRemoved] = useState(false);
   const startX = useRef(null);
   const canDelete = !n.virtual && /^[a-fA-F0-9]{24}$/.test(n._id);
+
+  // Build navigation target for tappable notifications
+  const navTarget = n.type === "announcement" && n.meta?.centerId
+    ? `/my/venues/${n.meta.centerId}/posts`
+    : null;
 
   function onTouchStart(e) {
     if (!canDelete) return;
@@ -78,10 +85,16 @@ function NotiItem({ n, onDelete }) {
             transform: `translateX(${offsetX}px)`,
             transition: swiping ? "none" : "transform 0.2s ease",
             background: offsetX < -40 ? `rgba(220,38,38,${Math.min(0.25, Math.abs(offsetX) / 200)})` : undefined,
+            cursor: navTarget ? "pointer" : "default",
           }}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          onClick={() => {
+            if (navTarget && Math.abs(offsetX) < 10) {
+              onNavigate(navTarget);
+            }
+          }}
         >
           <span className={`noti-ic ${n.type}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -91,7 +104,10 @@ function NotiItem({ n, onDelete }) {
           <span className="noti-body">
             <span className="noti-title">{n.title}</span>
             {n.message && <span className="noti-msg">{n.message}</span>}
-            <span className="noti-time">{timeAgo(n.createdAt)}</span>
+            <span className="noti-time">
+              {timeAgo(n.createdAt)}
+              {navTarget && <span className="noti-view-link"> · View post →</span>}
+            </span>
           </span>
           {/* Desktop delete button — visible on hover */}
           {canDelete && (
@@ -113,6 +129,7 @@ function NotiItem({ n, onDelete }) {
 }
 
 export default function NotificationBell({ role = "owner" }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
@@ -200,7 +217,7 @@ export default function NotificationBell({ role = "owner" }) {
           ) : (
             <ul className="noti-list">
               {items.map((n) => (
-                <NotiItem key={n._id} n={n} onDelete={deleteItem} />
+                <NotiItem key={n._id} n={n} onDelete={deleteItem} onNavigate={(path) => { setOpen(false); navigate(path); }} />
               ))}
             </ul>
           )}

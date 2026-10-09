@@ -14,6 +14,8 @@ import MyMemberships from "./pages/MyMemberships.jsx";
 import Attend from "./pages/Attend.jsx";
 import VenueAttendance from "./pages/VenueAttendance.jsx";
 import MarkAttendance from "./pages/MarkAttendance.jsx";
+import VenuePosts from "./pages/VenuePosts.jsx";
+import MemberVenuePosts from "./pages/MemberVenuePosts.jsx";
 
 function Shell({ children }) {
   return (
@@ -105,6 +107,26 @@ export default function App() {
           <ProtectedRoute>
             <Shell>
               <VenueAttendance />
+            </Shell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/centers/:id/posts"
+        element={
+          <ProtectedRoute>
+            <Shell>
+              <VenuePosts />
+            </Shell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my/venues/:centerId/posts"
+        element={
+          <ProtectedRoute>
+            <Shell>
+              <MemberVenuePosts />
             </Shell>
           </ProtectedRoute>
         }
