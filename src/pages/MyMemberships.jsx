@@ -326,8 +326,7 @@ export default function MyMemberships() {
         </div>
       ) : (
         <div className="my-cards">
-          {venues.map((g) => {
-            // Best status to show on the card
+          {venues.map((g) => {            // Best status to show on the card
             const cardSub = (g.regular?.status === "active" ? g.regular : null)
               || (g.pt?.status === "active" ? g.pt : null)
               || g.regular || g.pt;
@@ -379,6 +378,15 @@ export default function MyMemberships() {
             );
           })}
         </div>
+        <p style={{
+          textAlign: "center",
+          color: "var(--muted)",
+          fontSize: "0.82rem",
+          marginTop: 8,
+          opacity: 0.6,
+        }}>
+          Tap a venue to view your membership details
+        </p>
       )}
 
       {scanVenue && (
