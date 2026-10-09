@@ -74,6 +74,8 @@ export default function ScanCheckIn({ onClose, onSuccess, expectedVenueId, venue
           : `Checked in at ${res.data.venue}`
       );
       onSuccess?.();
+      // Auto-close after 1.5s on success so the user doesn't have to tap Done
+      setTimeout(() => onClose?.(), 1500);
     } catch (err) {
       setResult({
         ok: false,

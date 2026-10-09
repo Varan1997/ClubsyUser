@@ -288,7 +288,7 @@ export default function MyMemberships() {
               expectedVenueId={scanVenue._id}
               venueName={scanVenue.name}
               onClose={() => setScanVenue(null)}
-              onSuccess={() => { loadMemberships(); setScanVenue(null); }}
+              onSuccess={() => { loadMemberships(); }}
             />
           </Suspense>
         )}
