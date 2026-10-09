@@ -24,6 +24,8 @@ export default function Dashboard() {
   const [upiBusy, setUpiBusy] = useState(false);
 
   useEffect(() => {
+    // Remember this user came in as owner — used for session restore on reopen
+    localStorage.setItem("lastRole", "owner");
     api
       .get("/centers")
       .then((res) => setCenters(res.data.centers))
@@ -202,7 +204,10 @@ export default function Dashboard() {
 
       {/* ── Bottom nav ── */}
       <div className="dash-actions">
-        <button className="btn secondary" onClick={() => navigate("/choose", { state: { from: "back" } })}>
+        <button className="btn secondary" onClick={() => {
+          localStorage.removeItem("lastRole");
+          navigate("/choose", { state: { from: "back" } });
+        }}>
           ← Back
         </button>
         <button className="btn" onClick={() => setShowAddModal(true)}>

@@ -73,6 +73,8 @@ export default function MyMemberships() {
   }
 
   useEffect(() => {
+    // Remember this user came in as member — used for session restore on reopen
+    localStorage.setItem("lastRole", "member");
     api.get("/my/memberships")
       .then((r) => setList(r.data.memberships))
       .catch(() => {})
@@ -241,7 +243,12 @@ export default function MyMemberships() {
   // ── List view — one card per venue ──────────────────────────────────────────
   return (
     <>
-      <Link to="/choose" state={{ from: "back" }} className="back-link">
+      <Link
+        to="/choose"
+        state={{ from: "back" }}
+        className="back-link"
+        onClick={() => localStorage.removeItem("lastRole")}
+      >
         <span className="back-icon" aria-hidden="true">←</span> Switch
       </Link>
 
