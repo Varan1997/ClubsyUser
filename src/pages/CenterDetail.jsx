@@ -399,7 +399,7 @@ export default function CenterDetail() {
                         <td>{m.phone || "-"}</td>
                         <td>{formatDate(m.joinDate)}</td>
                         <td>{formatDate(m.expiryDate)}</td>
-                        <td><StatusBadge status={m.status} /></td>
+                        <td><StatusBadge status={m.status} daysLeft={m.daysLeft} /></td>
                         <td>
                           <div className="row-actions">
                             <button
@@ -462,7 +462,7 @@ export default function CenterDetail() {
                           <div className="mc-phone">{m.phone || "No phone"}</div>
                         </div>
                       </div>
-                      <StatusBadge status={m.status} />
+                      <StatusBadge status={m.status} daysLeft={m.daysLeft} />
                     </div>
                     <div className="mc-reveal">
                       <div className="mc-icons">
@@ -539,7 +539,7 @@ export default function CenterDetail() {
                   <div className="view-row"><span>Plan</span><strong>{regularRecord.planDays} days</strong></div>
                   <div className="view-row"><span>Start date</span><strong>{formatDate(regularRecord.joinDate)}</strong></div>
                   <div className="view-row"><span>Expiry date</span><strong>{formatDate(regularRecord.expiryDate)}</strong></div>
-                  <div className="view-row"><span>Status</span><strong><StatusBadge status={regularRecord.status} /></strong></div>
+                  <div className="view-row"><span>Status</span><strong><StatusBadge status={regularRecord.status} daysLeft={regularRecord.daysLeft} /></strong></div>
                 </div>
               </div>
             ) : (
@@ -561,7 +561,7 @@ export default function CenterDetail() {
                   <div className="view-row"><span>Plan</span><strong>{ptRecord.planDays} days</strong></div>
                   <div className="view-row"><span>Start date</span><strong>{formatDate(ptRecord.joinDate)}</strong></div>
                   <div className="view-row"><span>Expiry date</span><strong>{formatDate(ptRecord.expiryDate)}</strong></div>
-                  <div className="view-row"><span>Status</span><strong><StatusBadge status={ptRecord.status} /></strong></div>
+                  <div className="view-row"><span>Status</span><strong><StatusBadge status={ptRecord.status} daysLeft={ptRecord.daysLeft} /></strong></div>
                 </div>
               </div>
             ) : (

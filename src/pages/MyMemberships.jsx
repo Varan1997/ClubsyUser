@@ -136,7 +136,7 @@ export default function MyMemberships() {
 
         {/* Status row + scan */}
         <div className="myd-status">
-          <StatusBadge status={headerSub?.status} />
+          <StatusBadge status={headerSub?.status} daysLeft={headerSub?.daysLeft} />
           <span className="myd-days">
             {headerSub
               ? (headerSub.daysLeft < 0
@@ -308,7 +308,7 @@ export default function MyMemberships() {
                 </div>
 
                 {/* Status badge */}
-                <StatusBadge status={cardSub?.status} />
+                <StatusBadge status={cardSub?.status} daysLeft={cardSub?.daysLeft} />
 
                 {/* Scan button */}
                 {g.venue?._id && (
