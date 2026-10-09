@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios.js";
 import CategoryIcon from "../components/CategoryIcon.jsx";
 import Modal from "../components/Modal.jsx";
+import { toInputDate } from "../utils/format.js";
 
 export default function MarkAttendance() {
   const navigate = useNavigate();
@@ -95,7 +96,7 @@ export default function MarkAttendance() {
   const [savedIds, setSavedIds] = useState(new Set()); // IDs marked in last save
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPdfPicker, setShowPdfPicker] = useState(false);
-  const [pdfDate, setPdfDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [pdfDate, setPdfDate] = useState(() => toInputDate(new Date()));
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState("");
 
@@ -346,7 +347,7 @@ export default function MarkAttendance() {
               <button
                 type="button"
                 className="ma-pdf-btn"
-                onClick={() => { setPdfDate(new Date().toISOString().slice(0, 10)); setPdfError(""); setShowPdfPicker(true); }}
+                onClick={() => { setPdfDate(toInputDate(new Date())); setPdfError(""); setShowPdfPicker(true); }}
                 title="Download attendance PDF"
                 aria-label="Download attendance PDF"
               >
@@ -432,7 +433,7 @@ export default function MarkAttendance() {
             <input
               type="date"
               value={pdfDate}
-              max={new Date().toISOString().slice(0, 10)}
+              max={toInputDate(new Date())}
               onChange={(e) => setPdfDate(e.target.value)}
             />
           </div>
