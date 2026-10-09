@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import api from "../api/axios.js";
 import Modal from "../components/Modal.jsx";
@@ -39,12 +39,20 @@ export default function CenterDetail() {
   // Change-plan / Renew flow
   const [planTarget, setPlanTarget] = useState(null);
   const [planMode, setPlanMode] = useState("change");
+  // planStep: "early-warn" | "break-ask" | "break-date" | "pick" | "confirm" | "otp"
   const [planStep, setPlanStep] = useState("pick");
   const [pickedPlan, setPickedPlan] = useState(null);
   const [planOtp, setPlanOtp] = useState("");
   const [planInfo, setPlanInfo] = useState("");
   const [planBusy, setPlanBusy] = useState(false);
   const [planError, setPlanError] = useState("");
+  const [renewStartDate, setRenewStartDate] = useState(""); // "" = from expiry, date = custom start
+  const renewStartDateRef = React.useRef(""); // ref mirror so confirmChangePlan always reads latest value
+
+  function setRenewStart(v) {
+    renewStartDateRef.current = v;
+    setRenewStartDate(v);
+  }
 
   // Delete flow
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -134,9 +142,18 @@ export default function CenterDetail() {
   function openPlanPicker(m, mode) {
     setPlanTarget(m);
     setPlanMode(mode);
-    setPlanStep("pick");
     setPickedPlan(null);
     setPlanError("");
+    setRenewStart("");
+    if (mode === "renew" && m.status === "active" && m.daysLeft > 0) {
+      // Active member — warn about early renewal first
+      setPlanStep("early-warn");
+    } else if (mode === "renew" && m.status === "expired") {
+      // Expired member — ask if they took a break
+      setPlanStep("break-ask");
+    } else {
+      setPlanStep("pick");
+    }
   }
   const openChangePlan = (m) => openPlanPicker(m, "change");
   const openRenew     = (m) => openPlanPicker(m, "renew");
@@ -152,7 +169,10 @@ export default function CenterDetail() {
     setPlanBusy(true);
     try {
       if (planMode === "renew") {
-        await api.post(`/members/${planTarget._id}/renew`, { planDays: pickedPlan });
+        const body = { planDays: pickedPlan };
+        const startDate = renewStartDateRef.current; // use ref — always latest value
+        if (startDate) body.startDate = startDate;
+        await api.post(`/members/${planTarget._id}/renew`, body);
         toast.success(`${planTarget.name}'s membership renewed`);
         setPlanTarget(null);
         await load();
@@ -664,13 +684,103 @@ export default function CenterDetail() {
       {planTarget && (
         <Modal
           title={
-            planStep === "pick"
-              ? planMode === "renew" ? "Renew membership" : "Change plan"
-              : planStep === "otp" ? "Verify to change plan" : "Confirm"
+            planStep === "early-warn"  ? "Early renewal"
+            : planStep === "break-ask"  ? "Renew membership"
+            : planStep === "break-date" ? "Select start date"
+            : planStep === "pick"
+            ? (planMode === "renew" ? "Renew membership" : "Change plan")
+            : planStep === "confirm"
+            ? (planMode === "renew" ? "Confirm renewal" : "Confirm")
+            : "Verify to change plan"
           }
           onClose={closeChangePlan}
         >
-          {planStep === "pick" ? (
+          {planStep === "early-warn" ? (
+            <>
+              {planError && <div className="error" style={{ marginBottom: 12 }}>{planError}</div>}
+              <div className="info-banner" style={{
+                background: "var(--warning-bg, #fff8e1)",
+                border: "1px solid var(--warning-border, #ffe082)",
+                borderRadius: 10,
+                padding: "14px 16px",
+                marginBottom: 16,
+                color: "var(--text)",
+                lineHeight: 1.6,
+              }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>⚠️ Membership is still active</div>
+                <div style={{ color: "var(--muted)", fontSize: "0.92rem" }}>
+                  <strong style={{ color: "var(--text)" }}>{planTarget.name}</strong> still has{" "}
+                  <strong style={{ color: "var(--text)" }}>
+                    {planTarget.daysLeft} day{planTarget.daysLeft === 1 ? "" : "s"}
+                  </strong>{" "}
+                  remaining (expires {formatDate(planTarget.expiryDate)}).
+                </div>
+                <div style={{ marginTop: 8, color: "var(--muted)", fontSize: "0.92rem" }}>
+                  If you renew now, the new plan will <strong style={{ color: "var(--text)" }}>continue from the expiry date</strong>, so no days are lost.
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={closeChangePlan}>Cancel</button>
+                <button className="btn" onClick={() => setPlanStep("pick")}>
+                  Yes, renew early
+                </button>
+              </div>
+            </>
+          ) : planStep === "break-ask" ? (
+            <>
+              {planError && <div className="error" style={{ marginBottom: 12 }}>{planError}</div>}
+              <div style={{
+                background: "var(--card-bg, var(--bg))",
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                padding: "16px",
+                marginBottom: 18,
+              }}>
+                <div style={{ fontWeight: 600, marginBottom: 6, fontSize: "1rem" }}>
+                  Did <span style={{ color: "var(--accent)" }}>{planTarget.name}</span> take a break?
+                </div>
+                <div style={{ color: "var(--muted)", fontSize: "0.9rem", lineHeight: 1.6 }}>
+                  Their membership expired on{" "}
+                  <strong style={{ color: "var(--text)" }}>{formatDate(planTarget.expiryDate)}</strong>.
+                </div>
+                <div style={{ color: "var(--muted)", fontSize: "0.9rem", lineHeight: 1.6, marginTop: 4 }}>
+                  • <strong style={{ color: "var(--text)" }}>No</strong> — new plan continues from expiry date<br />
+                  • <strong style={{ color: "var(--text)" }}>Yes</strong> — you'll pick when they're restarting
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={closeChangePlan}>Cancel</button>
+                <button className="btn secondary" onClick={() => { setRenewStart(""); setPlanStep("pick"); }}>
+                  No, continue from expiry
+                </button>
+                <button className="btn" onClick={() => { setRenewStart(toInputDate(new Date())); setPlanStep("break-date"); }}>
+                  Yes, pick start date
+                </button>
+              </div>
+            </>
+          ) : planStep === "break-date" ? (
+            <>
+              {planError && <div className="error" style={{ marginBottom: 12 }}>{planError}</div>}
+              <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+                Select the date <strong style={{ color: "var(--text)" }}>{planTarget.name}</strong> is restarting their membership.
+              </p>
+              <div className="field" style={{ marginBottom: 18 }}>
+                <label>New start date</label>
+                <DatePicker
+                  inline
+                  value={renewStartDate}
+                  onChange={(v) => setRenewStart(v)}
+                  placeholder="Select start date"
+                />
+              </div>
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setPlanStep("break-ask")}>Back</button>
+                <button className="btn" onClick={() => setPlanStep("pick")} disabled={!renewStartDate}>
+                  Next — choose plan
+                </button>
+              </div>
+            </>
+          ) : planStep === "pick" ? (
             <>
               <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
                 {planMode === "renew"
@@ -695,21 +805,74 @@ export default function CenterDetail() {
                 </div>
               )}
               <div className="modal-actions">
+                {planMode === "renew" && (
+                  <button className="btn secondary" onClick={() => {
+                    if (planTarget.status === "expired") {
+                      // Go back to break-date if they picked a date, else break-ask
+                      setPlanStep(renewStartDate ? "break-date" : "break-ask");
+                    } else {
+                      setPlanStep("early-warn");
+                    }
+                  }}>Back</button>
+                )}
                 <button className="btn secondary" onClick={closeChangePlan}>Cancel</button>
               </div>
             </>
           ) : planStep === "confirm" ? (
             <>
               {planError && <div className="error" style={{ marginBottom: 12 }}>{planError}</div>}
-              <p style={{ color: "var(--muted)", margin: "0 0 4px", lineHeight: 1.5 }}>
-                {planMode === "renew"
-                  ? <>Extend <strong style={{ color: "var(--text)" }}>{planTarget.name}</strong>'s membership by <strong style={{ color: "var(--text)" }}>{pickedPlan} days</strong>?</>
-                  : <>Change <strong style={{ color: "var(--text)" }}>{planTarget.name}</strong> to the <strong style={{ color: "var(--text)" }}>{pickedPlan}-day</strong> plan? We'll send an OTP to confirm.</>}
-              </p>
+              {planMode === "renew" ? (() => {
+                // Compute new period:
+                // - break=yes: starts from owner-picked date
+                // - break=no / active: starts from current expiry
+                const newStart = renewStartDate
+                  ? new Date(renewStartDate)
+                  : new Date(planTarget.expiryDate);
+                const newExpiry = new Date(newStart);
+                newExpiry.setDate(newExpiry.getDate() + pickedPlan);
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                    <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+                      Review the renewal details before confirming.
+                    </p>
+                    <div style={{
+                      border: "1px solid var(--border)",
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      marginBottom: 18,
+                    }}>
+                      {[
+                        { label: "Member",        value: planTarget.name },
+                        { label: "Plan",           value: `${pickedPlan} days` },
+                        { label: "New start date", value: formatDate(newStart) },
+                        { label: "New expiry",     value: formatDate(newExpiry), highlight: true },
+                      ].map(({ label, value, highlight }, i, arr) => (
+                        <div key={label} style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "10px 14px",
+                          borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none",
+                          background: highlight ? "var(--success-bg, #f0fdf4)" : "transparent",
+                        }}>
+                          <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>{label}</span>
+                          <strong style={{ color: highlight ? "var(--success, #16a34a)" : "var(--text)" }}>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })() : (
+                <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+                  Change <strong style={{ color: "var(--text)" }}>{planTarget.name}</strong> to the{" "}
+                  <strong style={{ color: "var(--text)" }}>{pickedPlan}-day</strong> plan?{" "}
+                  We'll send an OTP to confirm.
+                </p>
+              )}
               <div className="modal-actions">
                 <button className="btn secondary" onClick={() => setPlanStep("pick")} disabled={planBusy}>Back</button>
                 <button className="btn" onClick={confirmChangePlan} disabled={planBusy}>
-                  {planBusy ? (planMode === "renew" ? "Saving…" : "Sending…") : (planMode === "renew" ? "Confirm" : "Continue")}
+                  {planBusy ? (planMode === "renew" ? "Saving…" : "Sending…") : (planMode === "renew" ? "Confirm renewal" : "Continue")}
                 </button>
               </div>
             </>

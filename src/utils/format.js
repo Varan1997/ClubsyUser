@@ -7,12 +7,14 @@ export function formatDate(d) {
   });
 }
 
-// For <input type="date"> value (yyyy-mm-dd).
+// For <input type="date"> value (yyyy-mm-dd) — uses local time, not UTC.
 export function toInputDate(d) {
   if (!d) return "";
   const date = new Date(d);
-  const off = date.getTimezoneOffset();
-  return new Date(date.getTime() - off * 60000).toISOString().slice(0, 10);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export const STATUS_LABEL = {

@@ -2963,6 +2963,104 @@ tr:last-child td {
   animation: fadeUp 0.2s ease both;
 }
 
+/* Inline calendar — flows inside the modal, no absolute positioning */
+.dp-inline-calendar {
+  width: 100%;
+  background: var(--panel-2, var(--panel));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-top: 8px;
+}
+.dp-inline-calendar .rdp-root {
+  --rdp-accent-color: var(--primary);
+  --rdp-accent-background-color: rgba(var(--primary-rgb), 0.15);
+  --rdp-selected-border: none;
+  --rdp-selected-font: inherit;
+  width: 100%;
+  margin: 0;
+}
+.dp-inline-calendar .rdp-months,
+.dp-inline-calendar .rdp-month {
+  width: 100%;
+  max-width: 100%;
+}
+.dp-inline-calendar .rdp-month_grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.dp-inline-calendar .rdp-day,
+.dp-inline-calendar .rdp-weekday {
+  width: auto;
+  max-width: none;
+  text-align: center;
+}
+.dp-inline-calendar .rdp-day_button {
+  width: 90%;
+  max-width: 40px;
+  border-radius: 8px;
+  color: var(--text);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.dp-inline-calendar .rdp-day_button:hover {
+  background: var(--panel-2);
+}
+/* Selected: no background, no border — just a small dot below the number */
+.dp-inline-calendar .rdp-selected .rdp-day_button {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 6px;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.dp-inline-calendar .rdp-selected .rdp-day_button::after {
+  content: "";
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.dp-inline-calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: var(--accent);
+  font-weight: 700;
+}
+.dp-inline-calendar .rdp-chevron {
+  fill: var(--primary);
+}
+.dp-inline-calendar .rdp-month_caption {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dp-inline-calendar .rdp-weekday {
+  color: var(--muted);
+  font-weight: 600;
+  padding-bottom: 4px;
+}
+.dp-inline-calendar .rdp-button_previous,
+.dp-inline-calendar .rdp-button_next {
+  border-radius: 10px;
+  transition: background 0.12s ease;
+}
+.dp-inline-calendar .rdp-button_previous:hover,
+.dp-inline-calendar .rdp-button_next:hover {
+  background: var(--panel-2);
+}
+/* Pointer on trigger when in inline mode */
+.datepicker-inline .dp-trigger {
+  cursor: default;
+  pointer-events: none;
+}
+
 /* react-day-picker v9 theming — sized to fit the field width */
 .dp-popover .rdp-root {
   --rdp-accent-color: var(--primary);
@@ -3024,9 +3122,25 @@ tr:last-child td {
   background: var(--panel-2);
 }
 .dp-popover .rdp-selected .rdp-day_button {
-  background: linear-gradient(135deg, var(--accent), var(--primary));
-  color: var(--on-primary);
+  background: transparent;
+  color: var(--accent);
   font-weight: 700;
+  position: relative;
+  padding-bottom: 6px;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.dp-popover .rdp-selected .rdp-day_button::after {
+  content: "";
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 .dp-popover .rdp-today:not(.rdp-selected) .rdp-day_button {
   color: var(--accent);
