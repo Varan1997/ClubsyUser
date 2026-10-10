@@ -70,6 +70,7 @@ export default function CenterDetail() {
   const [ptPicked, setPtPicked] = useState(null);
   const [ptBusy, setPtBusy] = useState(false);
   const [ptError, setPtError] = useState("");
+  const [ptStartDate, setPtStartDate] = useState("");
 
   async function load() {
     setLoading(true);
@@ -245,6 +246,7 @@ export default function CenterDetail() {
     setPtTarget(existingPt || m);
     setPtPicked(null);
     setPtError("");
+    setPtStartDate("");
     setPtStep(existingPt ? "renew" : "pick");
   }
   function closePt() { setPtTarget(null); }
@@ -252,15 +254,15 @@ export default function CenterDetail() {
   // Assign PT plan to a regular member
   async function assignPt() {
     if (!ptPicked) return;
+    if (!ptStartDate) { setPtError("Please select a start date."); return; }
     setPtBusy(true);
     setPtError("");
     try {
-      // POST new PT member record (same phone + center, memberType: pt)
       await api.post(`/centers/${id}/members`, {
         name: ptTarget.name,
         phone: ptTarget.phone,
         planDays: ptPicked,
-        startDate: toInputDate(new Date()),
+        startDate: ptStartDate,
         memberType: "pt",
       });
       toast.success(`${ptTarget.name} assigned PT plan`);
@@ -629,9 +631,17 @@ export default function CenterDetail() {
                   ))}
                 </div>
               )}
+              <div className="field" style={{ marginTop: 14 }}>
+                <label>Start date <span style={{ color: "var(--red, #ef4444)" }}>*</span></label>
+                <DatePicker
+                  value={ptStartDate}
+                  onChange={(v) => setPtStartDate(v)}
+                  placeholder="Select start date"
+                />
+              </div>
               <div className="modal-actions">
                 <button className="btn secondary" onClick={closePt}>Cancel</button>
-                <button className="btn" onClick={assignPt} disabled={ptBusy || !ptPicked}>
+                <button className="btn" onClick={assignPt} disabled={ptBusy || !ptPicked || !ptStartDate}>
                   {ptBusy ? "Assigning…" : "Assign PT"}
                 </button>
               </div>
