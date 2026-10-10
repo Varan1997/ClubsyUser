@@ -398,7 +398,14 @@ export default function MyMemberships() {
             expectedVenueId={scanVenue._id}
             venueName={scanVenue.name}
             onClose={() => setScanVenue(null)}
-            onSuccess={() => { loadMemberships(); setCalendarKey((k) => k + 1); }}
+            onSuccess={() => {
+              loadMemberships();
+              setCalendarKey((k) => k + 1);
+              // Navigate into venue detail so calendar shows updated attendance immediately
+              setSelected(scanVenue._id.toString());
+              setActiveTab("regular");
+              setScanVenue(null);
+            }}
           />
         </Suspense>
       )}
