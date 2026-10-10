@@ -295,6 +295,10 @@ export default function CenterDetail() {
   // The "pt" filter shows regular members who have a linked PT record.
   const regularMembers = members.filter((m) => (m.memberType || "regular") === "regular");
   const ptPhones = new Set(members.filter((m) => m.memberType === "pt").map((m) => m.phone));
+  // Map phone → PT record (with status/daysLeft) for showing PT status in pt filter
+  const ptMap = Object.fromEntries(
+    members.filter((m) => m.memberType === "pt").map((m) => [m.phone, m])
+  );
 
   const byStatus = filter === "all"
     ? regularMembers
@@ -421,7 +425,7 @@ export default function CenterDetail() {
                         <td>{m.phone || "-"}</td>
                         <td>{formatDate(m.joinDate)}</td>
                         <td>{formatDate(m.expiryDate)}</td>
-                        <td><StatusBadge status={m.status} daysLeft={m.daysLeft} /></td>
+                        <td><StatusBadge status={filter === "pt" ? (ptMap[m.phone]?.status ?? m.status) : m.status} daysLeft={filter === "pt" ? (ptMap[m.phone]?.daysLeft ?? m.daysLeft) : m.daysLeft} /></td>
                         <td>
                           <div className="row-actions">
                             <button
@@ -436,13 +440,20 @@ export default function CenterDetail() {
                                   <circle cx="6" cy="20" r="2" /><circle cx="18" cy="20" r="2" />
                                 </svg>
                               </button>
-                            <button className="btn secondary small" onClick={() => openRenew(m)} title="Renew">Renew</button>
-                            <button className="btn secondary small" onClick={() => setViewMember(m)}>View</button>
-                            {m.status === "active" && (
+                            {filter !== "pt" && (
                               <>
-                                <button className="btn secondary small" onClick={() => openChangePlan(m)}>Change plan</button>
-                                <button className="btn secondary small" onClick={() => openEdit(m)}>Edit</button>
+                                <button className="btn secondary small" onClick={() => openRenew(m)} title="Renew">Renew</button>
+                                <button className="btn secondary small" onClick={() => setViewMember(m)}>View</button>
+                                {m.status === "active" && (
+                                  <>
+                                    <button className="btn secondary small" onClick={() => openChangePlan(m)}>Change plan</button>
+                                    <button className="btn secondary small" onClick={() => openEdit(m)}>Edit</button>
+                                  </>
+                                )}
                               </>
+                            )}
+                            {filter === "pt" && (
+                              <button className="btn secondary small" onClick={() => setViewMember(m)}>View</button>
                             )}
                           </div>
                         </td>
@@ -484,7 +495,7 @@ export default function CenterDetail() {
                           <div className="mc-phone">{m.phone || "No phone"}</div>
                         </div>
                       </div>
-                      <StatusBadge status={m.status} daysLeft={m.daysLeft} />
+                      <StatusBadge status={filter === "pt" ? (ptMap[m.phone]?.status ?? m.status) : m.status} daysLeft={filter === "pt" ? (ptMap[m.phone]?.daysLeft ?? m.daysLeft) : m.daysLeft} />
                     </div>
                     <div className="mc-reveal">
                       <div className="mc-icons">
@@ -500,23 +511,27 @@ export default function CenterDetail() {
                               <circle cx="6" cy="20" r="2" /><circle cx="18" cy="20" r="2" />
                             </svg>
                           </button>
-                        <button className="mc-icon-btn renew" onClick={() => openRenew(m)} data-tooltip="Renew" aria-label="Renew">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 12a9 9 0 1 1-3-6.7" /><path d="M21 4v5h-5" />
-                          </svg>
-                        </button>
-                        {m.status === "active" && (
+                        {filter !== "pt" && (
                           <>
-                            <button className="mc-icon-btn change" onClick={() => openChangePlan(m)} data-tooltip="Change plan" aria-label="Change plan">
+                            <button className="mc-icon-btn renew" onClick={() => openRenew(m)} data-tooltip="Renew" aria-label="Renew">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M7 10l5-5 5 5M7 14l5 5 5-5" />
+                                <path d="M21 12a9 9 0 1 1-3-6.7" /><path d="M21 4v5h-5" />
                               </svg>
                             </button>
-                            <button className="mc-icon-btn edit" onClick={() => openEdit(m)} data-tooltip="Edit" aria-label="Edit">
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                              </svg>
-                            </button>
+                            {m.status === "active" && (
+                              <>
+                                <button className="mc-icon-btn change" onClick={() => openChangePlan(m)} data-tooltip="Change plan" aria-label="Change plan">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M7 10l5-5 5 5M7 14l5 5 5-5" />
+                                  </svg>
+                                </button>
+                                <button className="mc-icon-btn edit" onClick={() => openEdit(m)} data-tooltip="Edit" aria-label="Edit">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                                  </svg>
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
                         <button className="mc-icon-btn view" onClick={() => setViewMember(m)} data-tooltip="View details" aria-label="View details">
@@ -600,7 +615,7 @@ export default function CenterDetail() {
       {/* ── PT modal ── */}
       {ptTarget && (
         <Modal
-          title={ptStep === "renew" ? `PT — ${ptTarget.name}` : `Assign PT — ${ptTarget.name}`}
+          title={ptStep === "renew" ? `PT — ${ptTarget.name}` : ptStep === "confirm" ? `Confirm PT — ${ptTarget.name}` : `Assign PT — ${ptTarget.name}`}
           onClose={closePt}
         >
           {ptError && <div className="error" style={{ marginBottom: 12 }}>{ptError}</div>}
@@ -641,8 +656,56 @@ export default function CenterDetail() {
               </div>
               <div className="modal-actions">
                 <button className="btn secondary" onClick={closePt}>Cancel</button>
-                <button className="btn" onClick={assignPt} disabled={ptBusy || !ptPicked || !ptStartDate}>
-                  {ptBusy ? "Assigning…" : "Assign PT"}
+                <button className="btn" onClick={() => {
+                  if (!ptPicked) { setPtError("Please select a plan."); return; }
+                  if (!ptStartDate) { setPtError("Please select a start date."); return; }
+                  setPtError("");
+                  setPtStep("confirm");
+                }} disabled={!ptPicked || !ptStartDate}>
+                  Next
+                </button>
+              </div>
+            </>
+          ) : ptStep === "confirm" ? (
+            /* Confirm PT assignment */
+            <>
+              {ptError && <div className="error" style={{ marginBottom: 12 }}>{ptError}</div>}
+              <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+                Review the PT assignment before confirming.
+              </p>
+              <div style={{
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                overflow: "hidden",
+                marginBottom: 18,
+              }}>
+                {(() => {
+                  const expiry = new Date(ptStartDate + "T00:00:00");
+                  expiry.setDate(expiry.getDate() + ptPicked);
+                  return [
+                    { label: "Member",     value: ptTarget.name },
+                    { label: "Plan",       value: `${ptPicked} days` },
+                    { label: "Start date", value: formatDate(ptStartDate) },
+                    { label: "End date",   value: formatDate(expiry), highlight: true },
+                  ].map(({ label, value, highlight }, i, arr) => (
+                    <div key={label} style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 14px",
+                      borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none",
+                      background: highlight ? "var(--success-bg, #f0fdf4)" : "transparent",
+                    }}>
+                      <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>{label}</span>
+                      <strong style={{ color: highlight ? "var(--success, #16a34a)" : "var(--text)" }}>{value}</strong>
+                    </div>
+                  ));
+                })()}
+              </div>
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setPtStep("pick")} disabled={ptBusy}>Back</button>
+                <button className="btn" onClick={assignPt} disabled={ptBusy}>
+                  {ptBusy ? "Assigning…" : "Confirm & Assign PT"}
                 </button>
               </div>
             </>
