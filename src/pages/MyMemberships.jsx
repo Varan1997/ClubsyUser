@@ -65,6 +65,7 @@ export default function MyMemberships() {
   const [selected, setSelected] = useState(null); // venueId of opened venue
   const [activeTab, setActiveTab] = useState("regular"); // "regular" | "pt"
   const [scanVenue, setScanVenue] = useState(null);
+  const [calendarKey, setCalendarKey] = useState(0); // increment to force calendar refresh
 
   function loadMemberships() {
     api.get("/my/memberships")
@@ -222,7 +223,7 @@ export default function MyMemberships() {
             Attendance
           </div>
           <Suspense fallback={<div className="loading">Loading…</div>}>
-            {regularSub?._id && <AttendanceCalendar memberId={regularSub._id} />}
+            {regularSub?._id && <AttendanceCalendar memberId={regularSub._id} refreshKey={calendarKey} />}
           </Suspense>
         </div>
 
@@ -288,7 +289,7 @@ export default function MyMemberships() {
               expectedVenueId={scanVenue._id}
               venueName={scanVenue.name}
               onClose={() => setScanVenue(null)}
-              onSuccess={() => { loadMemberships(); }}
+              onSuccess={() => { loadMemberships(); setCalendarKey((k) => k + 1); }}
             />
           </Suspense>
         )}
@@ -397,7 +398,7 @@ export default function MyMemberships() {
             expectedVenueId={scanVenue._id}
             venueName={scanVenue.name}
             onClose={() => setScanVenue(null)}
-            onSuccess={loadMemberships}
+            onSuccess={() => { loadMemberships(); setCalendarKey((k) => k + 1); }}
           />
         </Suspense>
       )}

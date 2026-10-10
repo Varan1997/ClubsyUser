@@ -12,7 +12,7 @@ function keyOf(d) {
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
 }
 
-export default function AttendanceCalendar({ memberId }) {
+export default function AttendanceCalendar({ memberId, refreshKey = 0 }) {
   const [data, setData] = useState(null); // { days:Set, join, expiry }
   const [loading, setLoading] = useState(true);
   const [cursor, setCursor] = useState(() => {
@@ -21,6 +21,7 @@ export default function AttendanceCalendar({ memberId }) {
   });
 
   useEffect(() => {
+    setLoading(true);
     api
       .get(`/my/attendance/${memberId}`)
       .then((res) => {
@@ -32,7 +33,7 @@ export default function AttendanceCalendar({ memberId }) {
       })
       .catch(() => setData({ days: new Set(), join: null, expiry: null }))
       .finally(() => setLoading(false));
-  }, [memberId]);
+  }, [memberId, refreshKey]);
 
   const grid = useMemo(() => {
     const first = new Date(cursor.year, cursor.month, 1);
