@@ -71,6 +71,7 @@ export default function CenterDetail() {
   const [ptBusy, setPtBusy] = useState(false);
   const [ptError, setPtError] = useState("");
   const [ptStartDate, setPtStartDate] = useState("");
+  const [ptRenewStartDate, setPtRenewStartDate] = useState("");
 
   async function load() {
     setLoading(true);
@@ -247,6 +248,7 @@ export default function CenterDetail() {
     setPtPicked(null);
     setPtError("");
     setPtStartDate("");
+    setPtRenewStartDate("");
     setPtStep(existingPt ? "renew" : "pick");
   }
   function closePt() { setPtTarget(null); }
@@ -279,7 +281,9 @@ export default function CenterDetail() {
     setPtBusy(true);
     setPtError("");
     try {
-      await api.post(`/members/${ptTarget._id}/renew`, { planDays: ptPicked });
+      const body = { planDays: ptPicked };
+      if (ptRenewStartDate) body.startDate = ptRenewStartDate;
+      await api.post(`/members/${ptTarget._id}/renew`, body);
       toast.success(`${ptTarget.name}'s PT renewed`);
       setPtTarget(null);
       await load();
@@ -615,7 +619,7 @@ export default function CenterDetail() {
       {/* ── PT modal ── */}
       {ptTarget && (
         <Modal
-          title={ptStep === "renew" ? `PT — ${ptTarget.name}` : ptStep === "confirm" ? `Confirm PT — ${ptTarget.name}` : `Assign PT — ${ptTarget.name}`}
+          title={ptStep === "renew" ? `PT — ${ptTarget.name}` : ptStep === "renew-confirm" ? `Confirm PT Renewal — ${ptTarget.name}` : ptStep === "confirm" ? `Confirm PT — ${ptTarget.name}` : `Assign PT — ${ptTarget.name}`}
           onClose={closePt}
         >
           {ptError && <div className="error" style={{ marginBottom: 12 }}>{ptError}</div>}
@@ -709,8 +713,51 @@ export default function CenterDetail() {
                 </button>
               </div>
             </>
+          ) : ptStep === "renew-confirm" ? (
+            /* Confirm PT renewal */
+            <>
+              {ptError && <div className="error" style={{ marginBottom: 12 }}>{ptError}</div>}
+              <p style={{ color: "var(--muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+                Review the PT renewal before confirming.
+              </p>
+              <div style={{
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                overflow: "hidden",
+                marginBottom: 18,
+              }}>
+                {(() => {
+                  const expiry = new Date(ptRenewStartDate + "T00:00:00");
+                  expiry.setDate(expiry.getDate() + ptPicked);
+                  return [
+                    { label: "Member",     value: ptTarget.name },
+                    { label: "Plan",       value: `${ptPicked} days` },
+                    { label: "Start date", value: formatDate(ptRenewStartDate) },
+                    { label: "End date",   value: formatDate(expiry), highlight: true },
+                  ].map(({ label, value, highlight }, i, arr) => (
+                    <div key={label} style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 14px",
+                      borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none",
+                      background: highlight ? "var(--success-bg, #f0fdf4)" : "transparent",
+                    }}>
+                      <span style={{ color: "var(--muted)", fontSize: "0.9rem" }}>{label}</span>
+                      <strong style={{ color: highlight ? "var(--success, #16a34a)" : "var(--text)" }}>{value}</strong>
+                    </div>
+                  ));
+                })()}
+              </div>
+              <div className="modal-actions">
+                <button className="btn secondary" onClick={() => setPtStep("renew")} disabled={ptBusy}>Back</button>
+                <button className="btn" onClick={renewPt} disabled={ptBusy}>
+                  {ptBusy ? "Renewing…" : "Confirm & Renew PT"}
+                </button>
+              </div>
+            </>
           ) : (
-            /* Renew existing PT: show current info + pick plan to renew */
+            /* Renew existing PT: show current info + pick plan + start date */
             <>
               <div className="pt-current-info">
                 <div className="pci-row">
@@ -742,10 +789,24 @@ export default function CenterDetail() {
                   ))}
                 </div>
               )}
+              <div className="field" style={{ marginTop: 14 }}>
+                <label>Start date <span style={{ color: "var(--red, #ef4444)" }}>*</span></label>
+                <DatePicker
+                  value={ptRenewStartDate}
+                  onChange={(v) => setPtRenewStartDate(v)}
+                  placeholder="Select renewal start date"
+                />
+              </div>
               <div className="modal-actions">
                 <button className="btn secondary" onClick={closePt}>Cancel</button>
-                <button className="btn" onClick={renewPt} disabled={ptBusy || !ptPicked}>
-                  {ptBusy ? "Renewing…" : "Renew PT"}
+                <button className="btn" onClick={() => {
+                  if (!ptPicked) { setPtError("Please select a plan."); return; }
+                  if (!ptRenewStartDate) { setPtError("Please select a start date."); return; }
+                  setPtError("");
+                  // Show confirm summary inline
+                  setPtStep("renew-confirm");
+                }} disabled={!ptPicked || !ptRenewStartDate}>
+                  Next
                 </button>
               </div>
             </>
